@@ -26,21 +26,20 @@ public class MainActivity extends AppCompatActivity {
     private Button btnGo, btnToggleDevTools, btnRunConsole, btnInjectBlocker;
     private boolean isDevToolsOpen = false;
 
-    // Kịch bản chặn nhảy tab & quảng cáo hoàn chỉnh
     private static final String ANTI_POPUP_SCRIPT = 
             "(function() {" +
             "  window.open = function() { console.log('[Chặn] Đã ngăn mở tab/popup mới!'); return null; };" +
-            "  document.querySelectorAll('a[target="_blank"]').forEach(a => a.target = '_self');" +
+            "  document.querySelectorAll(\"a[target='_blank']\").forEach(a => a.target = '_self');" +
             "  const observer = new MutationObserver(mutations => {" +
             "    mutations.forEach(m => m.addedNodes.forEach(n => {" +
             "      if (n.nodeType === 1) {" +
             "        if (n.tagName === 'A' && n.getAttribute('target') === '_blank') n.setAttribute('target', '_self');" +
-            "        if (n.querySelectorAll) n.querySelectorAll('a[target="_blank"]').forEach(a => a.setAttribute('target', '_self'));" +
+            "        if (n.querySelectorAll) n.querySelectorAll(\"a[target='_blank']\").forEach(a => a.setAttribute('target', '_self'));" +
             "      }" +
             "    }));" +
             "  });" +
             "  observer.observe(document.body, { childList: true, subtree: true });" +
-            "  const adSelectors = ['iframe[src*="ads"]', 'iframe[src*="doubleclick"]', 'div[id*="pop"]', 'div[class*="pop"]', 'div[id*="ad"]', 'div[class*="ad"]', '.popunder', '.popup'];" +
+            "  const adSelectors = [\"iframe[src*='ads']\", \"iframe[src*='doubleclick']\", \"div[id*='pop']\", \"div[class*='pop']\", \"div[id*='ad']\", \"div[class*='ad']\", \".popunder\", \".popup\"];" +
             "  function hideAds() { adSelectors.forEach(s => document.querySelectorAll(s).forEach(el => { if(el.offsetWidth > 0 || el.offsetHeight > 0) el.style.display = 'none'; })); }" +
             "  hideAds(); setInterval(hideAds, 2000);" +
             "  console.log('[DevTools] Đã bật chặn Quảng Cáo & Nhảy Tab!');" +
@@ -80,7 +79,6 @@ public class MainActivity extends AppCompatActivity {
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
                 appendLog("info", "Tải trang hoàn tất!");
-                // Tự động tiêm script chặn nhảy tab & QC
                 webView.evaluateJavascript(ANTI_POPUP_SCRIPT, null);
             }
         });
@@ -128,7 +126,6 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Đã thực thi kịch bản Chặn QC & Pop-up!", Toast.LENGTH_SHORT).show();
         });
 
-        // Tải trang mặc định khi mở ứng dụng
         webView.loadUrl("https://www.google.com");
     }
 
