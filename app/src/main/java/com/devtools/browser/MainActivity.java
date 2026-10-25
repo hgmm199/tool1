@@ -1,11 +1,13 @@
 package com.devtools.browser;
 
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.ConsoleMessage;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -64,15 +66,23 @@ public class MainActivity extends AppCompatActivity {
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
+        settings.setLoadWithOverviewMode(true);
+        settings.setUseWideViewPort(true);
         settings.setJavaScriptCanOpenWindowsAutomatically(false);
         settings.setSupportMultipleWindows(false);
 
         webView.setWebViewClient(new WebViewClient() {
             @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                view.loadUrl(request.getUrl().toString());
+                return true;
+            }
+
+            @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 super.onPageStarted(view, url, favicon);
                 urlInput.setText(url);
-                appendLog("info", "Đang tải trang: " + url);
+                appendLog("info", "Đang tải: " + url);
             }
 
             @Override
@@ -94,17 +104,25 @@ public class MainActivity extends AppCompatActivity {
         });
 
         btnGo.setOnClickListener(v -> {
-            String url = urlInput.getText().toString().trim();
-            if (!url.startsWith("http://") && !url.startsWith("https://")) {
-                url = "https://" + url;
+            String input = urlInput.getText().toString().trim();
+            String targetUrl;
+            
+            if (input.startsWith("http://") || input.startsWith("https://")) {
+                targetUrl = input;
+            } else if (input.contains(".") && !input.contains(" ")) {
+                targetUrl = "https://" + input;
+            } else {
+                // Nếu là từ khóa, tự động chuyển sang tìm kiếm Google
+                targetUrl = "https://www.google.com/search?q=" + Uri.encode(input);
             }
-            webView.loadUrl(url);
+            
+            webView.loadUrl(targetUrl);
         });
 
         btnToggleDevTools.setOnClickListener(v -> {
             isDevToolsOpen = !isDevToolsOpen;
             devToolsDrawer.setVisibility(isDevToolsOpen ? View.VISIBLE : View.GONE);
-            btnToggleDevTools.setText(isDevToolsOpen ? "Ẩn F12" : "F12 Console");
+            btnToggleDevTools.setText(isDevToolsOpen ? "Ẩn F12" : "F12 CONSOLE");
         });
 
         btnRunConsole.setOnClickListener(v -> {
@@ -123,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
 
         btnInjectBlocker.setOnClickListener(v -> {
             webView.evaluateJavascript(ANTI_POPUP_SCRIPT, null);
-            Toast.makeText(this, "Đã thực thi kịch bản Chặn QC & Pop-up!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Đã kích hoạt kịch bản chặn QC!", Toast.LENGTH_SHORT).show();
         });
 
         webView.loadUrl("https://www.google.com");
@@ -148,7 +166,6 @@ public class MainActivity extends AppCompatActivity {
 
         logView.setText(message);
         consoleLogsLayout.addView(logView);
-
         consoleScrollView.post(() -> consoleScrollView.fullScroll(View.FOCUS_DOWN));
     }
 
