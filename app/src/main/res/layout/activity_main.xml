@@ -80,7 +80,7 @@
                 android:id="@+id/btnInjectBlocker"
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"
-                android:text="⚡ Chặn QC & Pop-up"
+                android:text="⚡ Chặn QC &amp; Pop-up"
                 android:textSize="11sp"
                 android:backgroundTint="#D32F2F" />
         </LinearLayout>
